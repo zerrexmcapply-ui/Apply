@@ -431,4 +431,328 @@
         els.step2Error.classList.add('hidden');
       }
 
-      function buildApplicationText
+      function buildApplicationText() {
+        const lines = [
+          'ZETREXMC STAFF APPLICATION',
+          '=========================',
+          `Name: ${state.name}`,
+          `Discord: ${state.discordName}`,
+          '',
+          '--- 20 QUESTIONS ---',
+        ];
+
+        STAFF_QUESTIONS.forEach((q) => {
+          const answer = (state.answers[q.id] || '').trim() || 'N/A';
+          lines.push('');
+          lines.push(`${q.id}. ${q.question}`);
+          lines.push(`Answer: ${answer}`);
+        });
+
+        return lines.join('\n');
+      }
+
+      function copyTextToClipboard(text) {
+        try {
+          const textarea = document.createElement('textarea');
+          textarea.value = text;
+          textarea.setAttribute('readonly', '');
+          textarea.style.position = 'fixed';
+          textarea.style.left = '-9999px';
+          document.body.appendChild(textarea);
+          textarea.select();
+          const ok = document.execCommand('copy');
+          document.body.removeChild(textarea);
+          return ok;
+        } catch (err) {
+          return false;
+        }
+      }
+
+      function renderSubmissionFeedback({ variant, title, message, includeCopyButton = false }) {
+        els.submissionFeedback.classList.remove(
+          'hidden',
+          'bg-emerald-950/60',
+          'border-emerald-700/70',
+          'text-emerald-100',
+          'bg-amber-950/60',
+          'border-amber-700/70',
+          'text-amber-100',
+          'bg-red-950/60',
+          'border-red-800/70',
+          'text-red-100'
+        );
+
+        if (variant === 'success') {
+          els.submissionFeedback.classList.add('bg-emerald-950/60', 'border-emerald-700/70', 'text-emerald-100');
+        } else if (variant === 'warning') {
+          els.submissionFeedback.classList.add('bg-amber-950/60', 'border-amber-700/70', 'text-amber-100');
+        } else {
+          els.submissionFeedback.classList.add('bg-red-950/60', 'border-red-800/70', 'text-red-100');
+        }
+
+        els.submissionFeedback.innerHTML = '';
+
+        const heading = document.createElement('p');
+        heading.className = 'font-bold text-sm sm:text-base';
+        heading.textContent = title;
+
+        const body = document.createElement('p');
+        body.className = 'text-xs sm:text-sm opacity-95 leading-relaxed';
+        body.textContent = message;
+
+        els.submissionFeedback.appendChild(heading);
+        els.submissionFeedback.appendChild(body);
+
+        if (includeCopyButton) {
+          const actionsRow = document.createElement('div');
+          actionsRow.className = 'pt-1 flex flex-wrap items-center gap-2.5';
+
+          const copyBtn = document.createElement('button');
+          copyBtn.type = 'button';
+          copyBtn.className =
+            'px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white text-xs font-semibold transition-colors cursor-pointer';
+          copyBtn.textContent = 'Copy Application Text';
+
+          const copyStatus = document.createElement('span');
+          copyStatus.className = 'text-xs font-medium';
+
+          copyBtn.addEventListener('click', () => {
+            const copied = copyTextToClipboard(state.lastFormattedReport);
+            copyStatus.textContent = copied ? 'Copied to clipboard.' : 'Could not copy automatically.';
+          });
+
+          const openSetupBtn = document.createElement('button');
+          openSetupBtn.type = 'button';
+          openSetupBtn.className =
+            'px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors cursor-pointer';
+          openSetupBtn.textContent = 'Open Telegram Setup';
+          openSetupBtn.addEventListener('click', openTelegramModal);
+
+          actionsRow.appendChild(copyBtn);
+          actionsRow.appendChild(openSetupBtn);
+          actionsRow.appendChild(copyStatus);
+          els.submissionFeedback.appendChild(actionsRow);
+        }
+      }
+
+      async function sendApplicationToTelegram(botToken, chatId, fullText) {
+        const MAX_CHUNK = 4000;
+        const chunks = [];
+
+        if (fullText.length <= MAX_CHUNK) {
+          chunks.push(fullText);
+        } else {
+          let remaining = fullText;
+          let partIndex = 1;
+          while (remaining.length > 0) {
+            let sliceEnd = MAX_CHUNK;
+            if (remaining.length > MAX_CHUNK) {
+              const lastNewline = remaining.lastIndexOf('\n', MAX_CHUNK);
+              if (lastNewline > 500) {
+                sliceEnd = lastNewline;
+              }
+            }
+            const partText = remaining.slice(0, sliceEnd).trim();
+            remaining = remaining.slice(sliceEnd).trim();
+            chunks.push(`[Part ${partIndex}]\n${partText}`);
+            partIndex += 1;
+          }
+        }
+
+        const endpoint = `https://api.telegram.org/bot${encodeURIComponent(botToken.trim())}/sendMessage`;
+
+        for (let i = 0; i < chunks.length; i += 1) {
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              chat_id: chatId.trim(),
+              text: chunks[i],
+            }),
+          });
+
+          const data = await response.json().catch(() => null);
+          if (!response.ok || !data || !data.ok) {
+            const detail = data && data.description ? data.description : `HTTP ${response.status}`;
+            throw new Error(detail);
+          }
+        }
+      }
+
+      function openTelegramModal() {
+        els.tgBotTokenInput.value = localStorage.getItem(STORAGE_KEYS.BOT_TOKEN) || '';
+        els.tgChatIdInput.value = localStorage.getItem(STORAGE_KEYS.CHAT_ID) || '';
+        els.tgSaveStatus.classList.add('hidden');
+        els.telegramModal.classList.remove('hidden');
+      }
+
+      function closeTelegramModal() {
+        els.telegramModal.classList.add('hidden');
+      }
+
+      function showTelegramModalStatus(text, isError) {
+        els.tgSaveStatus.textContent = text;
+        els.tgSaveStatus.className = isError
+          ? 'text-xs rounded-xl px-3.5 py-2.5 bg-red-950/70 border border-red-800/70 text-red-200'
+          : 'text-xs rounded-xl px-3.5 py-2.5 bg-emerald-950/70 border border-emerald-700/70 text-emerald-200';
+        els.tgSaveStatus.classList.remove('hidden');
+      }
+
+      els.startBtn.addEventListener('click', () => {
+        goToStep(2);
+        els.applicantName.focus();
+      });
+
+      els.brandHomeBtn.addEventListener('click', () => {
+        goToStep(1);
+      });
+
+      els.backToStep1Btn.addEventListener('click', () => {
+        clearStep2Error();
+        goToStep(1);
+      });
+
+      els.backToStep2Btn.addEventListener('click', () => {
+        goToStep(2);
+      });
+
+      els.basicInfoForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        clearStep2Error();
+
+        const nameVal = els.applicantName.value.trim();
+        const discordVal = els.discordName.value.trim();
+
+        if (!nameVal) {
+          showStep2Error('Please enter your Name.');
+          els.applicantName.focus();
+          return;
+        }
+
+        if (!discordVal) {
+          showStep2Error('Please enter your Discord username.');
+          els.discordName.focus();
+          return;
+        }
+
+        state.name = nameVal;
+        state.discordName = discordVal;
+        goToStep(3);
+      });
+
+      els.staffQuestionsForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        STAFF_QUESTIONS.forEach((q) => {
+          const input = document.getElementById(`q_${q.id}`);
+          if (input) {
+            state.answers[q.id] = input.value.trim();
+          }
+        });
+
+        const unanswered = STAFF_QUESTIONS.filter((q) => !state.answers[q.id]);
+        if (unanswered.length > 0) {
+          const firstMissingId = unanswered[0].id;
+          renderSubmissionFeedback({
+            variant: 'error',
+            title: 'Incomplete Application',
+            message: `Please answer all 20 questions before clicking Apply. Missing question #${firstMissingId}: "${unanswered[0].question}"`,
+          });
+          const missingEl = document.getElementById(`q_${firstMissingId}`);
+          if (missingEl) {
+            missingEl.focus();
+            missingEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          return;
+        }
+
+        const formattedReport = buildApplicationText();
+        state.lastFormattedReport = formattedReport;
+
+        const botToken = (localStorage.getItem(STORAGE_KEYS.BOT_TOKEN) || '').trim();
+        const chatId = (localStorage.getItem(STORAGE_KEYS.CHAT_ID) || '').trim();
+
+        if (!botToken || !chatId) {
+          renderSubmissionFeedback({
+            variant: 'warning',
+            title: 'Telegram Bot Not Configured Yet',
+            message:
+              'Your application has been prepared below. Configure your Telegram Bot Token and Chat ID in "Telegram Setup" so submissions send automatically to Telegram, or copy the text manually.',
+            includeCopyButton: true,
+          });
+          els.submissionFeedback.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          return;
+        }
+
+        els.applySubmitBtn.disabled = true;
+        const originalBtnText = els.applySubmitBtn.textContent;
+        els.applySubmitBtn.textContent = 'Sending...';
+
+        try {
+          await sendApplicationToTelegram(botToken, chatId, formattedReport);
+          renderSubmissionFeedback({
+            variant: 'success',
+            title: 'Application Sent',
+            message: 'Your ZetrexMc staff application has been sent to Telegram.',
+            includeCopyButton: true,
+          });
+        } catch (err) {
+          renderSubmissionFeedback({
+            variant: 'error',
+            title: 'Failed to Send to Telegram',
+            message: `Error: ${err && err.message ? err.message : 'Network or Telegram API error'}. You can copy the application text below or check Telegram Setup.`,
+            includeCopyButton: true,
+          });
+        } finally {
+          els.applySubmitBtn.disabled = false;
+          els.applySubmitBtn.textContent = originalBtnText;
+          els.submissionFeedback.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+
+      els.openTelegramModalBtn.addEventListener('click', openTelegramModal);
+      els.closeTelegramModalBtn.addEventListener('click', closeTelegramModal);
+
+      els.telegramModal.addEventListener('click', (e) => {
+        if (e.target === els.telegramModal) {
+          closeTelegramModal();
+        }
+      });
+
+      els.saveTelegramConfigBtn.addEventListener('click', () => {
+        const token = els.tgBotTokenInput.value.trim();
+        const chat = els.tgChatIdInput.value.trim();
+
+        if (!token || !chat) {
+          showTelegramModalStatus('Please enter both a Telegram Bot Token and Chat ID.', true);
+          return;
+        }
+
+        try {
+          localStorage.setItem(STORAGE_KEYS.BOT_TOKEN, token);
+          localStorage.setItem(STORAGE_KEYS.CHAT_ID, chat);
+          showTelegramModalStatus('Saved Telegram configuration locally.', false);
+        } catch (err) {
+          showTelegramModalStatus('Could not save settings to browser storage.', true);
+        }
+      });
+
+      els.clearTelegramConfigBtn.addEventListener('click', () => {
+        try {
+          localStorage.removeItem(STORAGE_KEYS.BOT_TOKEN);
+          localStorage.removeItem(STORAGE_KEYS.CHAT_ID);
+          els.tgBotTokenInput.value = '';
+          els.tgChatIdInput.value = '';
+          showTelegramModalStatus('Cleared saved Telegram configuration.', false);
+        } catch (err) {
+          showTelegramModalStatus('Failed to clear configuration.', true);
+        }
+      });
+
+      renderQuestions();
+    })();
+  </script>
+</body>
+</html>

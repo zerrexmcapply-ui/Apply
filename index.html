@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZetrexMc — Staff Application</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            void: '#000000',
+            surface: '#09090b',
+            card: '#111114',
+            line: '#232329',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    html, body {
+      background-color: #000000;
+      color: #f4f4f5;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #09090b;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #27272a;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3f3f46;
+    }
+  </style>
+</head>
+<body class="bg-black text-zinc-100 min-h-screen flex flex-col selection:bg-emerald-500/30 selection:text-emerald-200">
+
+  <header class="w-full px-4 sm:px-6 py-4 flex items-center justify-between border-b border-zinc-900/80 bg-black/80 backdrop-blur-sm sticky top-0 z-30">
+    <button
+      type="button"
+      id="brandHomeBtn"
+      class="text-xs sm:text-sm font-semibold tracking-wider uppercase text-zinc-400 hover:text-white transition-colors rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-zinc-700"
+      title="Return to start"
+    >
+      ZetrexMc
+    </button>
+
+    <button
+      type="button"
+      id="openTelegramModalBtn"
+      class="text-xs font-medium text-zinc-400 hover:text-zinc-100 bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-1.5 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+    >
+      Telegram Setup
+    </button>
+  </header>
+
+  <main class="flex-1 w-full flex flex-col items-center justify-center px-4 py-8 sm:py-12">
+
+    <!-- STEP 1: LANDING / START VIEW -->
+    <section
+      id="step1Section"
+      class="w-full max-w-xl mx-auto flex flex-col items-center justify-center text-center py-12 space-y-8"
+      aria-label="Start Application"
+    >
+      <div class="space-y-3">
+        <p class="text-xs uppercase tracking-[0.25em] text-zinc-500 font-semibold">
+          Staff Recruitment
+        </p>
+        <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white">
+          ZetrexMc
+        </h1>
+      </div>
+
+      <button
+        type="button"
+        id="startBtn"
+        class="w-full sm:w-auto min-w-[180px] px-8 py-4 rounded-xl bg-zinc-100 hover:bg-white active:scale-[0.99] text-black font-bold text-base tracking-wide transition-all shadow-lg shadow-white/5 focus:outline-none focus:ring-4 focus:ring-zinc-700 cursor-pointer"
+      >
+        start
+      </button>
+    </section>
+
+    <!-- STEP 2: BASIC INFO VIEW -->
+    <section
+      id="step2Section"
+      class="hidden w-full max-w-md mx-auto"
+      aria-label="Basic Information"
+    >
+      <div class="w-full bg-card border border-line rounded-2xl p-6 sm:p-8 shadow-2xl">
+        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white text-center mb-7">
+          Apply ZetrexMc
+        </h2>
+
+        <form id="basicInfoForm" class="space-y-5" novalidate>
+          <div>
+            <label for="applicantName" class="block text-sm font-medium text-zinc-200 mb-2">
+              Name (اسمك)
+            </label>
+            <input
+              type="text"
+              id="applicantName"
+              name="applicantName"
+              required
+              autocomplete="name"
+              class="w-full rounded-xl bg-surface border border-zinc-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 text-white px-4 py-3 text-sm sm:text-base outline-none transition-all"
+            />
+          </div>
+
+          <div>
+            <label for="applicantAge" class="block text-sm font-medium text-zinc-200 mb-2">
+              Age (عمرك)
+            </label>
+            <input
+              type="number"
+              id="applicantAge"
+              name="applicantAge"
+              min="10"
+              max="99"
+              required
+              class="w-full rounded-xl bg-surface border border-zinc-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 text-white px-4 py-3 text-sm sm:text-base outline-none transition-all"
+            />
+          </div>
+
+          <div
+            id="step2Error"
+            class="hidden rounded-xl bg-red-950/60 border border-red-800/70 text-red-200 text-xs sm:text-sm px-4 py-3"
+            role="alert"
+          ></div>
+
+          <div class="pt-2 flex items-center gap-3">
+            <button
+              type="button"
+              id="backToStep1Btn"
+              class="px-4 py-3.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 font-semibold text-sm transition-colors cursor-pointer"
+            >
+              Back
+            </button>
+            <button
+              type="submit"
+              id="doneBtn"
+              class="flex-1 py-3.5 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-bold text-sm sm:text-base tracking-wide transition-all shadow-lg shadow-blue-600/20 focus:outline-none focus:ring-4 focus:ring-blue-500/40 cursor-pointer"
+            >
+              Done
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- STEP 3: 20 ENGLISH STAFF QUESTIONS VIEW -->
+    <section
+      id="step3Section"
+      class="hidden w-full max-w-3xl mx-auto"
+      aria-label="ZetrexMc Staff Questions"
+    >
+      <div class="bg-card border border-line rounded-2xl p-6 sm:p-8 shadow-2xl">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-6 mb-6 border-b border-zinc-800/90">
+          <div>
+            <p class="text-xs uppercase tracking-widest text-emerald-400 font-semibold mb-1">
+              Staff Questionnaire
+            </p>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white">
+              ZetrexMc Staff Questions
+            </h2>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 text-xs text-zinc-300 bg-surface border border-zinc-800 rounded-xl px-3.5 py-2">
+            <span id="summaryNameBadge" class="font-semibold text-white"></span>
+            <span class="text-zinc-600">|</span>
+            <span id="summaryAgeBadge" class="text-zinc-300"></span>
+          </div>
+        </div>
+
+        <form id="staffQuestionsForm" class="space-y-6" novalidate>
+          <div id="questionsContainer" class="space-y-5"></div>
+
+          <div
+            id="submissionFeedback"
+            class="hidden rounded-2xl border p-4 sm:p-5 text-sm space-y-3"
+            role="status"
+          ></div>
+
+          <div class="pt-4 border-t border-zinc-800/90 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <button
+              type="button"
+              id="backToStep2Btn"
+              class="px-5 py-3.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 font-semibold text-sm transition-colors cursor-pointer"
+            >
+              Back to Info
+            </button>
+
+            <button
+              type="submit"
+              id="applySubmitBtn"
+              class="px-8 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm sm:text-base tracking-wide transition-all shadow-lg shadow-emerald-600/25 focus:outline-none focus:ring-4 focus:ring-emerald-500/40 cursor-pointer"
+            >
+              Apply
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- TELEGRAM BOT CONFIGURATION MODAL -->
+  <div
+    id="telegramModal"
+    class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="telegramModalTitle"
+  >
+    <div class="w-full max-w-md bg-card border border-line rounded-2xl p-6 shadow-2xl space-y-5">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h3 id="telegramModalTitle" class="text-lg font-bold text-white">
+            Telegram Application Delivery
+          </h3>
+          <p class="text-xs text-zinc-400 mt-1 leading-relaxed">
+            Configure your Telegram Bot Token and Chat ID so applications submitted via <span class="text-emerald-400 font-medium">Apply</span> are sent directly to your Telegram chat.
+          </p>
+        </div>
+        <button
+          type="button"
+          id="closeTelegramModalBtn"
+          class="text-zinc-400 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors cursor-pointer"
+        >
+          Close
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label for="tgBotTokenInput" class="block text-xs font-semibold uppercase tracking-wider text-zinc-300 mb-1.5">
+            Telegram Bot Token
+          </label>
+          <input
+            type="password"
+            id="tgBotTokenInput"
+            autocomplete="off"
+            class="w-full rounded-xl bg-surface border border-zinc-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 text-white px-3.5 py-2.5 text-sm outline-none transition-all"
+          />
+        </div>
+
+        <div>
+          <label for="tgChatIdInput" class="block text-xs font-semibold uppercase tracking-wider text-zinc-300 mb-1.5">
+            Telegram Chat ID
+          </label>
+          <input
+            type="text"
+            id="tgChatIdInput"
+            autocomplete="off"
+            class="w-full rounded-xl bg-surface border border-zinc-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 text-white px-3.5 py-2.5 text-sm outline-none transition-all"
+          />
+        </div>
+
+        <div id="tgSaveStatus" class="hidden text-xs rounded-xl px-3.5 py-2.5"></div>
+      </div>
+
+      <div class="flex items-center justify-between gap-3 pt-2">
+        <button
+          type="button"
+          id="clearTelegramConfigBtn"
+          class="px-3.5 py-2.5 rounded-xl bg-zinc-900 hover:bg-red-950/60 border border-zinc-800 hover:border-red-800/70 text-zinc-400 hover:text-red-200 text-xs font-semibold transition-colors cursor-pointer"
+        >
+          Clear
+        </button>
+        <button
+          type="button"
+          id="saveTelegramConfigBtn"
+          class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold transition-colors cursor-pointer"
+        >
+          Save Configuration
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const STORAGE_KEYS = {
+        BOT_TOKEN: 'zetrexmc_tg_bot_token',
+        CHAT_ID: 'zetrexmc_tg_chat_id',
+      };
+
+      const STAFF_QUESTIONS = [
+        { id: 1, question: 'What is your Discord username?', type: 'text' },
+        { id: 2, question: 'What is your Minecraft (Java / Bedrock) in-game username and platform?', type: 'text' },
+        { id: 3, question: 'What is your timezone and which days/hours are you most active on ZetrexMc?', type: 'textarea' },
+        { id: 4, question: 'Why do you want to join the ZetrexMc staff team instead of simply playing as a regular member?', type: 'textarea' },
+        { id: 5, question: 'Do you have previous moderation, helper, or staff experience on Minecraft servers or Discord communities? Explain your role.', type: 'textarea' },
+        { id: 6, question: 'What qualities make you a reliable and fair staff member for ZetrexMc?', type: 'textarea' },
+        { id: 7, question: 'How would you handle a player who is spamming chat or posting inappropriate links?', type: 'textarea' },
+        { id: 8, question: 'What steps would you take if you suspect a player is using hacked clients, auto-clickers, or exploits?', type: 'textarea' },
+        { id: 9, question: 'How do you stay calm and objective when a player argues with you or insults you after receiving a punishment?', type: 'textarea' },
+        { id: 10, question: 'If a close friend or clanmate breaks ZetrexMc rules, how would you respond?', type: 'textarea' },
+        { id: 11, question: 'What is the difference between a Helper, Moderator, and Administrator in your view?', type: 'textarea' },
+        { id: 12, question: 'How would you resolve a heated argument or scam accusation between two players in chat or a ticket?', type: 'textarea' },
+        { id: 13, question: 'Are you familiar with common moderation commands, punishment escalation, and ticket/evidence logging?', type: 'textarea' },
+        { id: 14, question: 'What would you do if you are unsure whether a specific action or build violates the server rules?', type: 'textarea' },
+        { id: 15, question: 'How do you handle situations where another staff member makes a mistake or abuses permissions?', type: 'textarea' },
+        { id: 16, question: 'How comfortable are you helping new players who are confused about ZetrexMc features, rules, or gameplay?', type: 'textarea' },
+        { id: 17, question: 'Can you commit to following staff confidentiality and not leaking internal staff discussions or decisions?', type: 'textarea' },
+        { id: 18, question: 'How do you balance being active and helpful while avoiding burnout or rushing punishments?', type: 'textarea' },
+        { id: 19, question: 'What improvements or ideas could you bring to help keep the ZetrexMc community welcoming and competitive?', type: 'textarea' },
+        { id: 20, question: 'Is there anything else you want the ZetrexMc administration team to know about you or your application?', type: 'textarea' },
+      ];
+
+      const state = {
+        currentStep: 1,
+        name: '',
+        age: '',
+        answers: {},
+        lastFormattedReport: '',
+      };
+
+      const els = {
+        step1Section: document.getElementById('step1Section'),
+        step2Section: document.getElementById('step2Section'),
+        step3Section: document.getElementById('step3Section'),
+
+        startBtn: document.getElementById('startBtn'),
+        brandHomeBtn: document.getElementById('brandHomeBtn'),
+        backToStep1Btn: document.getElementById('backToStep1Btn'),
+        backToStep2Btn: document.getElementById('backToStep2Btn'),
+
+        basicInfoForm: document.getElementById('basicInfoForm'),
+        applicantName: document.getElementById('applicantName'),
+        applicantAge: document.getElementById('applicantAge'),
+        step2Error: document.getElementById('step2Error'),
+
+        summaryNameBadge: document.getElementById('summaryNameBadge'),
+        summaryAgeBadge: document.getElementById('summaryAgeBadge'),
+        questionsContainer: document.getElementById('questionsContainer'),
+        staffQuestionsForm: document.getElementById('staffQuestionsForm'),
+        submissionFeedback: document.getElementById('submissionFeedback'),
+        applySubmitBtn: document.getElementById('applySubmitBtn'),
+
+        openTelegramModalBtn: document.getElementById('openTelegramModalBtn'),
+        closeTelegramModalBtn: document.getElementById('closeTelegramModalBtn'),
+        telegramModal: document.getElementById('telegramModal'),
+        tgBotTokenInput: document.getElementById('tgBotTokenInput'),
+        tgChatIdInput: document.getElementById('tgChatIdInput'),
+        saveTelegramConfigBtn: document.getElementById('saveTelegramConfigBtn'),
+        clearTelegramConfigBtn: document.getElementById('clearTelegramConfigBtn'),
+        tgSaveStatus: document.getElementById('tgSaveStatus'),
+      };
+
+      function goToStep(stepNumber) {
+        state.currentStep = stepNumber;
+
+        els.step1Section.classList.toggle('hidden', stepNumber !== 1);
+        els.step2Section.classList.toggle('hidden', stepNumber !== 2);
+        els.step3Section.classList.toggle('hidden', stepNumber !== 3);
+
+        if (stepNumber === 3) {
+          els.summaryNameBadge.textContent = state.name;
+          els.summaryAgeBadge.textContent = `Age: ${state.age}`;
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function renderQuestions() {
+        const fragment = document.createDocumentFragment();
+
+        STAFF_QUESTIONS.forEach((item) => {
+          const card = document.createElement('div');
+          card.className = 'rounded-xl bg-surface border border-zinc-800/90 p-4 sm:p-5 space-y-2.5';
+
+          const label = document.createElement('label');
+          label.setAttribute('for', `q_${item.id}`);
+          label.className = 'block text-sm sm:text-base font-semibold text-zinc-100 leading-snug';
+          label.textContent = `${item.id}. ${item.question}`;
+
+          let inputEl;
+          if (item.type === 'text') {
+            inputEl = document.createElement('input');
+            inputEl.type = 'text';
+            inputEl.className =
+              'w-full rounded-xl bg-card border border-zinc-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 text-white px-4 py-2.5 text-sm outline-none transition-all';
+          } else {
+            inputEl = document.createElement('textarea');
+            inputEl.rows = item.id === 20 ? 2 : 3;
+            inputEl.className =
+              'w-full rounded-xl bg-card border border-zinc-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 text-white px-4 py-2.5 text-sm outline-none transition-all resize-y';
+          }
+
+          inputEl.id = `q_${item.id}`;
+          inputEl.name = `q_${item.id}`;
+          inputEl.value = state.answers[item.id] || '';
+          inputEl.addEventListener('input', (e) => {
+            state.answers[item.id] = e.target.value;
+          });
+
+          card.appendChild(label);
+          card.appendChild(inputEl);
+          fragment.appendChild(card);
+        });
+
+        els.questionsContainer.innerHTML = '';
+        els.questionsContainer.appendChild(fragment);
+      }
+
+      function showStep2Error(message) {
+        els.step2Error.textContent = message;
+        els.step2Error.classList.remove('hidden');
+      }
+
+      function clearStep2Error() {
+        els.step2Error.textContent = '';
+        els.step2Error.classList.add('hidden');
+      }
+
+      function buildApplicationText() {
+        const lines = [
+          'ZETREXMC STAFF APPLICATION',
+          '=========================',
+          `Name: ${state.name}`,
+          `Age: ${state.age}`,
+          '',
+          '--- 20 QUESTIONS ---',
+        ];
+
+        STAFF_QUESTIONS.forEach((q) => {
+          const answer = (state.answers[q.id] || '').trim() || 'N/A';
+          lines.push('');
+          lines.push(`${q.id}. ${q.question}`);
+          lines.push(`Answer: ${answer}`);
+        });
+
+        return lines.join('\n');
+      }
+
+      function copyTextToClipboard(text) {
+        try {
+          const textarea = document.createElement('textarea');
+          textarea.value = text;
+          textarea.setAttribute('readonly', '');
+          textarea.style.position = 'fixed';
+          textarea.style.left = '-9999px';
+          document.body.appendChild(textarea);
+          textarea.select();
+          const ok = document.execCommand('copy');
+          document.body.removeChild(textarea);
+          return ok;
+        } catch (err) {
+          return false;
+        }
+      }
+
+      function renderSubmissionFeedback({ variant, title, message, includeCopyButton = false }) {
+        els.submissionFeedback.classList.remove(
+          'hidden',
+          'bg-emerald-950/60',
+          'border-emerald-700/70',
+          'text-emerald-100',
+          'bg-amber-950/60',
+          'border-amber-700/70',
+          'text-amber-100',
+          'bg-red-950/60',
+          'border-red-800/70',
+          'text-red-100'
+        );
+
+        if (variant === 'success') {
+          els.submissionFeedback.classList.add('bg-emerald-950/60', 'border-emerald-700/70', 'text-emerald-100');
+        } else if (variant === 'warning') {
+          els.submissionFeedback.classList.add('bg-amber-950/60', 'border-amber-700/70', 'text-amber-100');
+        } else {
+          els.submissionFeedback.classList.add('bg-red-950/60', 'border-red-800/70', 'text-red-100');
+        }
+
+        els.submissionFeedback.innerHTML = '';
+
+        const heading = document.createElement('p');
+        heading.className = 'font-bold text-sm sm:text-base';
+        heading.textContent = title;
+
+        const body = document.createElement('p');
+        body.className = 'text-xs sm:text-sm opacity-95 leading-relaxed';
+        body.textContent = message;
+
+        els.submissionFeedback.appendChild(heading);
+        els.submissionFeedback.appendChild(body);
+
+        if (includeCopyButton) {
+          const actionsRow = document.createElement('div');
+          actionsRow.className = 'pt-1 flex flex-wrap items-center gap-2.5';
+
+          const copyBtn = document.createElement('button');
+          copyBtn.type = 'button';
+          copyBtn.className =
+            'px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white text-xs font-semibold transition-colors cursor-pointer';
+          copyBtn.textContent = 'Copy Application Text';
+
+          const copyStatus = document.createElement('span');
+          copyStatus.className = 'text-xs font-medium';
+
+          copyBtn.addEventListener('click', () => {
+            const copied = copyTextToClipboard(state.lastFormattedReport);
+            copyStatus.textContent = copied ? 'Copied to clipboard.' : 'Could not copy automatically.';
+          });
+
+          const openSetupBtn = document.createElement('button');
+          openSetupBtn.type = 'button';
+          openSetupBtn.className =
+            'px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors cursor-pointer';
+          openSetupBtn.textContent = 'Open Telegram Setup';
+          openSetupBtn.addEventListener('click', openTelegramModal);
+
+          actionsRow.appendChild(copyBtn);
+          actionsRow.appendChild(openSetupBtn);
+          actionsRow.appendChild(copyStatus);
+          els.submissionFeedback.appendChild(actionsRow);
+        }
+      }
+
+      async function sendApplicationToTelegram(botToken, chatId, fullText) {
+        const MAX_CHUNK = 4000;
+        const chunks = [];
+
+        if (fullText.length <= MAX_CHUNK) {
+          chunks.push(fullText);
+        } else {
+          let remaining = fullText;
+          let partIndex = 1;
+          while (remaining.length > 0) {
+            let sliceEnd = MAX_CHUNK;
+            if (remaining.length > MAX_CHUNK) {
+              const lastNewline = remaining.lastIndexOf('\n', MAX_CHUNK);
+              if (lastNewline > 500) {
+                sliceEnd = lastNewline;
+              }
+            }
+            const partText = remaining.slice(0, sliceEnd).trim();
+            remaining = remaining.slice(sliceEnd).trim();
+            chunks.push(`[Part ${partIndex}]\n${partText}`);
+            partIndex += 1;
+          }
+        }
+
+        const endpoint = `https://api.telegram.org/bot${encodeURIComponent(botToken.trim())}/sendMessage`;
+
+        for (let i = 0; i < chunks.length; i += 1) {
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              chat_id: chatId.trim(),
+              text: chunks[i],
+            }),
+          });
+
+          const data = await response.json().catch(() => null);
+          if (!response.ok || !data || !data.ok) {
+            const detail = data && data.description ? data.description : `HTTP ${response.status}`;
+            throw new Error(detail);
+          }
+        }
+      }
+
+      function openTelegramModal() {
+        els.tgBotTokenInput.value = localStorage.getItem(STORAGE_KEYS.BOT_TOKEN) || '';
+        els.tgChatIdInput.value = localStorage.getItem(STORAGE_KEYS.CHAT_ID) || '';
+        els.tgSaveStatus.classList.add('hidden');
+        els.telegramModal.classList.remove('hidden');
+      }
+
+      function closeTelegramModal() {
+        els.telegramModal.classList.add('hidden');
+      }
+
+      function showTelegramModalStatus(text, isError) {
+        els.tgSaveStatus.textContent = text;
+        els.tgSaveStatus.className = isError
+          ? 'text-xs rounded-xl px-3.5 py-2.5 bg-red-950/70 border border-red-800/70 text-red-200'
+          : 'text-xs rounded-xl px-3.5 py-2.5 bg-emerald-950/70 border border-emerald-700/70 text-emerald-200';
+        els.tgSaveStatus.classList.remove('hidden');
+      }
+
+      els.startBtn.addEventListener('click', () => {
+        goToStep(2);
+        els.applicantName.focus();
+      });
+
+      els.brandHomeBtn.addEventListener('click', () => {
+        goToStep(1);
+      });
+
+      els.backToStep1Btn.addEventListener('click', () => {
+        clearStep2Error();
+        goToStep(1);
+      });
+
+      els.backToStep2Btn.addEventListener('click', () => {
+        goToStep(2);
+      });
+
+      els.basicInfoForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        clearStep2Error();
+
+        const nameVal = els.applicantName.value.trim();
+        const ageRaw = els.applicantAge.value.trim();
+        const ageNum = Number(ageRaw);
+
+        if (!nameVal) {
+          showStep2Error('Please enter your Name.');
+          els.applicantName.focus();
+          return;
+        }
+
+        if (!ageRaw || Number.isNaN(ageNum) || !Number.isInteger(ageNum) || ageNum < 10 || ageNum > 99) {
+          showStep2Error('Please enter a valid Age.');
+          els.applicantAge.focus();
+          return;
+        }
+
+        state.name = nameVal;
+        state.age = String(ageNum);
+        goToStep(3);
+      });
+
+      els.staffQuestionsForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        STAFF_QUESTIONS.forEach((q) => {
+          const input = document.getElementById(`q_${q.id}`);
+          if (input) {
+            state.answers[q.id] = input.value.trim();
+          }
+        });
+
+        const unanswered = STAFF_QUESTIONS.filter((q) => !state.answers[q.id]);
+        if (unanswered.length > 0) {
+          const firstMissingId = unanswered[0].id;
+          renderSubmissionFeedback({
+            variant: 'error',
+            title: 'Incomplete Application',
+            message: `Please answer all 20 questions before clicking Apply. Missing question #${firstMissingId}: "${unanswered[0].question}"`,
+          });
+          const missingEl = document.getElementById(`q_${firstMissingId}`);
+          if (missingEl) {
+            missingEl.focus();
+            missingEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          return;
+        }
+
+        const formattedReport = buildApplicationText();
+        state.lastFormattedReport = formattedReport;
+
+        const botToken = (localStorage.getItem(STORAGE_KEYS.BOT_TOKEN) || '').trim();
+        const chatId = (localStorage.getItem(STORAGE_KEYS.CHAT_ID) || '').trim();
+
+        if (!botToken || !chatId) {
+          renderSubmissionFeedback({
+            variant: 'warning',
+            title: 'Telegram Bot Not Configured Yet',
+            message:
+              'Your application has been prepared below. Configure your Telegram Bot Token and Chat ID in "Telegram Setup" so submissions send automatically to Telegram, or copy the text manually.',
+            includeCopyButton: true,
+          });
+          els.submissionFeedback.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          return;
+        }
+
+        els.applySubmitBtn.disabled = true;
+        const originalBtnText = els.applySubmitBtn.textContent;
+        els.applySubmitBtn.textContent = 'Sending...';
+
+        try {
+          await sendApplicationToTelegram(botToken, chatId, formattedReport);
+          renderSubmissionFeedback({
+            variant: 'success',
+            title: 'Application Sent',
+            message: 'Your ZetrexMc staff application has been sent to Telegram.',
+            includeCopyButton: true,
+          });
+        } catch (err) {
+          renderSubmissionFeedback({
+            variant: 'error',
+            title: 'Failed to Send to Telegram',
+            message: `Error: ${err && err.message ? err.message : 'Network or Telegram API error'}. You can copy the application text below or check Telegram Setup.`,
+            includeCopyButton: true,
+          });
+        } finally {
+          els.applySubmitBtn.disabled = false;
+          els.applySubmitBtn.textContent = originalBtnText;
+          els.submissionFeedback.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+
+      els.openTelegramModalBtn.addEventListener('click', openTelegramModal);
+      els.closeTelegramModalBtn.addEventListener('click', closeTelegramModal);
+
+      els.telegramModal.addEventListener('click', (e) => {
+        if (e.target === els.telegramModal) {
+          closeTelegramModal();
+        }
+      });
+
+      els.saveTelegramConfigBtn.addEventListener('click', () => {
+        const token = els.tgBotTokenInput.value.trim();
+        const chat = els.tgChatIdInput.value.trim();
+
+        if (!token || !chat) {
+          showTelegramModalStatus('Please enter both a Telegram Bot Token and Chat ID.', true);
+          return;
+        }
+
+        try {
+          localStorage.setItem(STORAGE_KEYS.BOT_TOKEN, token);
+          localStorage.setItem(STORAGE_KEYS.CHAT_ID, chat);
+          showTelegramModalStatus('Saved Telegram configuration locally.', false);
+        } catch (err) {
+          showTelegramModalStatus('Could not save settings to browser storage.', true);
+        }
+      });
+
+      els.clearTelegramConfigBtn.addEventListener('click', () => {
+        try {
+          localStorage.removeItem(STORAGE_KEYS.BOT_TOKEN);
+          localStorage.removeItem(STORAGE_KEYS.CHAT_ID);
+          els.tgBotTokenInput.value = '';
+          els.tgChatIdInput.value = '';
+          showTelegramModalStatus('Cleared saved Telegram configuration.', false);
+        } catch (err) {
+          showTelegramModalStatus('Failed to clear configuration.', true);
+        }
+      });
+
+      renderQuestions();
+    })();
+  </script>
+</body>
+</html>
